@@ -119,14 +119,17 @@ namespace TCPGeckoAromaLibrary
                 return;
             }
 
-            busy.Add("Pause");
+            string place = busy.Count.ToString();
 
-            while (busy[0] != "Pause")
+            busy.Add("Pause" + place);
+
+            while (busy[0] != "Pause" + place)
             {
                 //do nothing while instruction not on top of queue
             }
+            
 
-            var message = "pause ";
+            var message = "pause";
 
             if (debug) Console.WriteLine(message);
 
@@ -153,14 +156,16 @@ namespace TCPGeckoAromaLibrary
                 return;
             }
 
-            busy.Add("Advance");
+            string place = busy.Count.ToString();
 
-            while (busy[0] != "Advance")
+            busy.Add("Advance" + place);
+
+            while (busy[0] != "Advance" + place)
             {
                 //do nothing while instruction not on top of queue
             }
 
-            var message = "advance ";
+            var message = "advance";
 
             if (debug) Console.WriteLine(message);
 
@@ -187,14 +192,16 @@ namespace TCPGeckoAromaLibrary
                 return;
             }
 
-            busy.Add("Resume");
+            string place = busy.Count.ToString();
 
-            while (busy[0] != "Resume")
+            busy.Add("Resume" + place);
+
+            while (busy[0] != "Resume" + place)
             {
                 //do nothing while instruction not on top of queue
             }
 
-            var message = "resume ";
+            var message = "resume";
 
             if (debug) Console.WriteLine(message);
 

@@ -110,7 +110,9 @@ namespace TCPGeckoAromaLibrary
             {
 
             }
-            return results[commandId];
+            var result = results[commandId];
+            results.Remove(commandId);
+            return result;
         }
 
         public void Poke(Datatype type, int address, int value)
@@ -135,6 +137,7 @@ namespace TCPGeckoAromaLibrary
             {
 
             }
+            results.Remove(commandId);
             return;
         }
 
@@ -168,8 +171,9 @@ namespace TCPGeckoAromaLibrary
             {
 
             }
-
-            return results[commandId].Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var result = results[commandId].Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            results.Remove(commandId);
+            return result;
         }
 
         public void PokeMultiple(Datatype type, int[] addresses, int[] values)
@@ -203,6 +207,7 @@ namespace TCPGeckoAromaLibrary
             {
 
             }
+            results.Remove(commandId);
             return;
         }
 
@@ -223,6 +228,7 @@ namespace TCPGeckoAromaLibrary
             {
 
             }
+            results.Remove(commandId);
             return;
         }
 
@@ -243,6 +249,7 @@ namespace TCPGeckoAromaLibrary
             {
 
             }
+            results.Remove(commandId);
             return;
         }
 
@@ -263,6 +270,7 @@ namespace TCPGeckoAromaLibrary
             {
 
             }
+            results.Remove(commandId);
             return;
         }
 

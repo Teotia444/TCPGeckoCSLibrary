@@ -82,6 +82,7 @@ namespace TCPGeckoAromaLibrary
 
         public void Disconnect()
         {
+            if (!client.Connected) return;
             client.Shutdown(SocketShutdown.Both);
             client.Disconnect(true);
             connected = false;

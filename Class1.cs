@@ -57,27 +57,45 @@ namespace TCPGeckoAromaLibrary
                 catch (SocketException e)
                 {
                     Console.WriteLine("{0} Error code: {1}.", e.Message, e.ErrorCode);
-                    continue;
+                    connected = false;
+                    Console.WriteLine("force disconnect");
+                    Disconnect();
+                    break;
                 }
 
                 results[queueElement.Item2] = result;
             }
         }
 
-        public void Connect(string ipAddress, bool _debug = false)
+        public bool Connect(string ipAddress, bool _debug = false)
         {
             debug = _debug;
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(ipAddress), 7332);
-            client = new Socket(
-                  ip.AddressFamily,
-                  SocketType.Stream,
-                  ProtocolType.Tcp);
+            try
+            {
+                IPEndPoint ip = new IPEndPoint(IPAddress.Parse(ipAddress), 7332);
+                client = new Socket(
+                      ip.AddressFamily,
+                      SocketType.Stream,
+                      ProtocolType.Tcp);
 
-            client.Connect(ip);
+                var result = client.BeginConnect(ip, null, null);
+                if(!result.AsyncWaitHandle.WaitOne(3000, true))
+                {
+                    client.Close();
+                    return false;
+                }
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+
             connected = true;
             commandHandler = new Thread(CommandHandler);
             commandHandler.Start();
-            return;
+            return true;
         }
 
         public void Disconnect()
@@ -87,10 +105,13 @@ namespace TCPGeckoAromaLibrary
             client.Disconnect(true);
             connected = false;
             commandHandler.Join();
+            commands.Clear();
+            results.Clear();
         }
 
         public string Peek(Datatype type, int address)
         {
+            if (!connected) return "Disconnected";
             if(address < 0x10000000)
             {
                 return "Invalid";
@@ -107,10 +128,11 @@ namespace TCPGeckoAromaLibrary
             commands.Enqueue((message, commandId));
             results[commandId] = "";
             if (debug) Console.WriteLine(message);
-            while (results[commandId] == "")
+            while (results[commandId] == "" && connected)
             {
-
+                
             }
+            if (!connected) return "Disconnected";
             var result = results[commandId];
             results.Remove(commandId);
             return result;
@@ -118,6 +140,7 @@ namespace TCPGeckoAromaLibrary
 
         public void Poke(Datatype type, int address, int value)
         {
+            if (!connected) return;
             if (address < 0x10000000)
             {
                 return;
@@ -134,16 +157,18 @@ namespace TCPGeckoAromaLibrary
             commands.Enqueue((message, commandId));
             results[commandId] = "";
             if (debug) Console.WriteLine(message);
-            while (results[commandId] == "")
+            while (results[commandId] == "" && connected)
             {
-
+                
             }
+            if (!connected) return;
             results.Remove(commandId);
             return;
         }
 
         public List<string> PeekMultiple(Datatype type, int[] addresses)
         {
+            if (!connected) return Enumerable.Range(1, 16).Select(_ => "0").ToList();
             foreach (int address in addresses)
             {
                 if (address < 0x10000000)
@@ -168,10 +193,11 @@ namespace TCPGeckoAromaLibrary
             commands.Enqueue((message, commandId));
             results[commandId] = "";
             if (debug) Console.WriteLine(message);
-            while (results[commandId] == "")
+            while (results[commandId] == "" && connected)
             {
-
+                
             }
+            if (!connected) return Enumerable.Range(1, 16).Select(_ => "0").ToList();
             var result = results[commandId].Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             results.Remove(commandId);
             return result;
@@ -179,6 +205,7 @@ namespace TCPGeckoAromaLibrary
 
         public void PokeMultiple(Datatype type, int[] addresses, int[] values)
         {
+            if (!connected) return;
             foreach (int address in addresses)
             {
                 if (address < 0x10000000)
@@ -204,9 +231,9 @@ namespace TCPGeckoAromaLibrary
             commands.Enqueue((message, commandId));
             results[commandId] = "";
             if (debug) Console.WriteLine(message);
-            while (results[commandId] == "")
+            while (results[commandId] == "" && connected)
             {
-
+                
             }
             results.Remove(commandId);
             return;
@@ -214,6 +241,7 @@ namespace TCPGeckoAromaLibrary
 
         public void PauseExec()
         {
+            if (!connected) return;
             if (client == null)
             {
                 Console.WriteLine("Not Connected to wii u");
@@ -225,16 +253,18 @@ namespace TCPGeckoAromaLibrary
             commands.Enqueue((message, commandId));
             results[commandId] = "";
             if (debug) Console.WriteLine(message);
-            while (results[commandId] == "")
+            while (results[commandId] == "" && connected)
             {
 
             }
+            if (!connected) return;
             results.Remove(commandId);
             return;
         }
 
         public void AdvanceExec()
         {
+            if (!connected) return;
             if (client == null)
             {
                 Console.WriteLine("Not Connected to wii u");
@@ -246,16 +276,18 @@ namespace TCPGeckoAromaLibrary
             commands.Enqueue((message, commandId));
             results[commandId] = "";
             if (debug) Console.WriteLine(message);
-            while (results[commandId] == "")
+            while (results[commandId] == "" && connected)
             {
 
             }
+
             results.Remove(commandId);
             return;
         }
 
         public void ResumeExec()
         {
+            if (!connected) return;
             if (client == null)
             {
                 Console.WriteLine("Not Connected to wii u");
@@ -267,10 +299,11 @@ namespace TCPGeckoAromaLibrary
             commands.Enqueue((message, commandId));
             results[commandId] = "";
             if (debug) Console.WriteLine(message);
-            while (results[commandId] == "")
+            while (results[commandId] == "" && connected)
             {
 
             }
+            if (!connected) return;
             results.Remove(commandId);
             return;
         }

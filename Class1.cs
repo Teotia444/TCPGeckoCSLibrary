@@ -138,7 +138,7 @@ namespace TCPGeckoAromaLibrary
             return result;
         }
 
-        public void Poke(Datatype type, int address, int value)
+        public void Poke(Datatype type, int address, uint value)
         {
             if (!connected) return;
             if (address < 0x10000000)
@@ -160,6 +160,33 @@ namespace TCPGeckoAromaLibrary
             while (results[commandId] == "" && connected)
             {
                 
+            }
+            if (!connected) return;
+            results.Remove(commandId);
+            return;
+        }
+        public void Poke(Datatype type, int address, int value)
+        {
+            if (!connected) return;
+            if (address < 0x10000000)
+            {
+                return;
+            }
+            if (client == null)
+            {
+                Console.WriteLine("Not Connected to wii u");
+                return;
+            }
+
+            var message = "poke -t " + type + " -a " + $"0x{address:X}" + " -v " + $"0x{value:X}";
+            var commandId = Guid.NewGuid().ToString();
+
+            commands.Enqueue((message, commandId));
+            results[commandId] = "";
+            if (debug) Console.WriteLine(message);
+            while (results[commandId] == "" && connected)
+            {
+
             }
             if (!connected) return;
             results.Remove(commandId);
@@ -203,7 +230,7 @@ namespace TCPGeckoAromaLibrary
             return result;
         }
 
-        public void PokeMultiple(Datatype type, int[] addresses, int[] values)
+        public void PokeMultiple(Datatype type, int[] addresses, uint[] values)
         {
             if (!connected) return;
             foreach (int address in addresses)
@@ -294,6 +321,28 @@ namespace TCPGeckoAromaLibrary
                 return;
             }
             var message = "resume";
+            var commandId = Guid.NewGuid().ToString();
+
+            commands.Enqueue((message, commandId));
+            results[commandId] = "";
+            if (debug) Console.WriteLine(message);
+            while (results[commandId] == "" && connected)
+            {
+
+            }
+            if (!connected) return;
+            results.Remove(commandId);
+            return;
+        }
+        public void DisplayText(string text, int r, int g, int b, int a)
+        {
+            if (!connected) return;
+            if (client == null)
+            {
+                Console.WriteLine("Not Connected to wii u");
+                return;
+            }
+            var message = "drawtext -text ("+ text +") -a "+ a +" -r "+ r + " -g "+ g +"-b " + b;
             var commandId = Guid.NewGuid().ToString();
 
             commands.Enqueue((message, commandId));

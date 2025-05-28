@@ -265,6 +265,41 @@ namespace TCPGeckoAromaLibrary
             results.Remove(commandId);
             return;
         }
+        public void PokeMultiple(Datatype type, int[] addresses, int[] values)
+        {
+            if (!connected) return;
+            foreach (int address in addresses)
+            {
+                if (address < 0x10000000)
+                {
+                    return;
+                }
+            }
+            if (client == null)
+            {
+                Console.WriteLine("Not Connected to wii u");
+                return;
+            }
+
+            var message = "pokemultiple -t " + type;
+
+            for (int i = 0; i < addresses.Length; i++)
+            {
+                message += " -a " + addresses[i] + " -v " + values[i];
+            }
+
+            var commandId = Guid.NewGuid().ToString();
+
+            commands.Enqueue((message, commandId));
+            results[commandId] = "";
+            if (debug) Console.WriteLine(message);
+            while (results[commandId] == "" && connected)
+            {
+
+            }
+            results.Remove(commandId);
+            return;
+        }
 
         public void PauseExec()
         {
